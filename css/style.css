@@ -645,7 +645,7 @@ address { font-style: normal; font-family: var(--ff-display); font-size: clamp(1
 .hours th { font-weight: 500; }
 .hours td { text-align: right; color: var(--muted); }
 .hours tr.is-today th, .hours tr.is-today td { background: var(--wine); color: var(--cream); border-bottom-color: var(--wine); }
-.hours tr.is-today td { font-weight: 600; }
+.hours tr.is-today td { font-weight: 600; box-shadow: -1px 0 0 var(--wine); } /* copre la giunzione tra le celle */
 .hours tr.is-today th::after { content: "oggi"; margin-left: .7rem; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; background: var(--ochre); color: var(--wine-ink); padding: .15rem .5rem; border-radius: 99px; font-weight: 700; }
 .hours tr.is-today th { border-radius: 12px 0 0 12px; }
 .hours tr.is-today td { border-radius: 0 12px 12px 0; }

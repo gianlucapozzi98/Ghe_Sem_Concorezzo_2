@@ -41,7 +41,6 @@ Oppure trascina la cartella su vercel.com/new.
 
 ## Prima di andare online
 
-- Verificare gli orari con il titolare: alcuni elenchi online riportano orari diversi da quelli usati qui.
 - Aggiungere Privacy e Cookie policy, e i dati societari (P.IVA) nel footer.
 - Sostituire le foto segnaposto e togliere la dicitura nel footer.
 - La mappa di Google si carica solo al click, quindi non servono banner cookie per la mappa. Se si aggiungono analytics o altri servizi, serve un banner.
