@@ -90,6 +90,7 @@ h2 em, h3 em { font-style: italic; font-weight: 400; color: var(--wine); }
 }
 .kicker::before { content: ""; width: 34px; height: 1.5px; background: currentColor; }
 .kicker-light { color: var(--cream); }
+.k-city { white-space: nowrap; }
 .kicker-ochre { color: var(--ochre); }
 .kicker-ink { color: var(--wine-ink); }
 
@@ -245,7 +246,7 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
   opacity: 0;
   transform: scale(1.14);
-  will-change: opacity;
+  will-change: transform, opacity;
   transition: opacity 1.2s ease, transform 0s linear 1.2s;
 }
 .slide:first-child, .slide.is-on { opacity: 1; }
@@ -336,7 +337,7 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 .story .bar { display: block; position: relative; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(244, 239, 228, .25); margin-bottom: .75rem; }
 .story .bar::after { content: ""; position: absolute; inset: 0; background: var(--cream); transform: scaleX(0); transform-origin: left; }
 .story.is-done .bar::after { transform: scaleX(1); }
-.story.is-active .bar::after { animation: fill 6s linear forwards; }
+.hero.is-playing .story.is-active .bar::after { animation: fill 6s linear forwards; }
 .hero.is-still .story.is-active .bar::after { animation: none; transform: scaleX(1); }
 @keyframes fill { to { transform: scaleX(1); } }
 .story .t { display: block; font-family: var(--ff-display); font-size: 1.25rem; font-weight: 500; line-height: 1; }
@@ -344,12 +345,23 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 
 @media (max-width: 760px) {
   .br-d { display: none; }
+  /* "Café & bistrot" e sotto "Concorezzo (MB)": il timbro 13 € resta a destra, senza coprire il testo */
+  .hero .kicker { align-items: flex-start; }
+  .hero .kicker::before { margin-top: .72em; }
+  .k-city { display: block; }
+  .k-sep { display: none; }
   .hero-title { margin-top: 2.8rem; }
   .hand { left: auto; right: 6px; top: -1.45em; }
   .hand svg { display: none; }
   .badge { width: 104px; bottom: auto; top: 92px; }
   .hero-inner { padding-bottom: 150px; }
   .hero-cta .btn-ghost { display: none; }
+}
+
+@media (max-width: 400px) {
+  .badge { width: 88px; top: 76px; }
+  .badge-core b { font-size: 2.2rem; }
+  .badge-core i { font-size: 1.05rem; }
 }
 
 /* ==========================================================================
@@ -725,7 +737,9 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
    fanno scattare l'hero su molti telefoni. Qui restano solo dissolvenze. */
 @media (max-width: 900px), (hover: none) {
   body::before { display: none; }
-  .slide, .slide.is-active { transform: none; transition: opacity 1.2s ease; }
+  /* zoom lento anche su telefono, ma più corto e più lento: la foto non resta ferma */
+  .slide { transform: scale(1.08); }
+  .slide.is-active { transition: opacity 1.2s ease, transform 12s ease-out; }
   .badge-ring { animation: none; }
   .status.is-open .dot { animation: none; box-shadow: 0 0 0 4px rgba(92, 210, 140, .28); }
   #progress { display: none; }
@@ -746,4 +760,7 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0ms !important; }
   .marquee-track { animation: none; }
   .ch, .hand { opacity: 1; transform: none; }
+  /* la dissolvenza tra le foto resta (nessun movimento), lo zoom no */
+  .slide, .slide.is-active { transform: none; transition: opacity 1.2s ease !important; }
+  .hero.is-playing .story.is-active .bar::after { animation-duration: 6s !important; }
 }

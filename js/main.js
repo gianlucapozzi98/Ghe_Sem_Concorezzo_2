@@ -131,22 +131,31 @@
      ------------------------------------------------------------------ */
   /* Il cambio di slide è guidato da un timer, non dall'animazione CSS della barra:
      con "riduci movimento" attivo le animazioni durano 0 ms e le slide si
-     rincorrerebbero a raffica (sfarfallio). Con ?statico lo slideshow resta fermo. */
+     rincorrerebbero a raffica (sfarfallio). La dissolvenza resta anche con
+     "riduci movimento" (è un cambio di foto, non un movimento); lo zoom no.
+     Con ?statico lo slideshow resta fermo. */
   const hero = $('.hero');
   const slides = $$('.slide');
   const stories = $$('.story');
   const SLIDE_MS = 6000;
-  const autoplay = !reduceMotion && !/[?&]statico\b/.test(location.search);
+  const autoplay = !/[?&]statico\b/.test(location.search);
   let cur = 0;
   let timer = 0;
-  let ready = false;
   let heroVisible = true;
 
   if (!autoplay) hero.classList.add('is-still');
 
-  function schedule() {
+  function schedule(delay = SLIDE_MS) {
     clearTimeout(timer);
-    if (autoplay && ready && heroVisible && !document.hidden) timer = setTimeout(() => showSlide(cur + 1), SLIDE_MS);
+    if (!(autoplay && heroVisible && !document.hidden)) return;
+    timer = setTimeout(() => {
+      const next = slides[(cur + 1) % slides.length];
+      /* rete lenta: la foto successiva non è ancora arrivata, si aspetta */
+      if (!next.complete || !next.naturalWidth) { schedule(400); return; }
+      /* la foto viene decodificata prima della dissolvenza: farlo a metà blocca il telefono */
+      const go = () => showSlide(cur + 1);
+      if (next.decode) next.decode().then(go, go); else go();
+    }, delay);
   }
 
   function showSlide(i) {
@@ -167,16 +176,18 @@
   }
   stories.forEach((s, i) => s.addEventListener('click', () => showSlide(i)));
 
-  /* si parte solo dopo aver decodificato le tre foto: decodificarne una a metà
-     dissolvenza blocca il telefono per un istante e la foto "salta" */
-  const decoded = Promise.all(slides.map((img) => (img.decode ? img.decode().catch(() => {}) : Promise.resolve())));
-  Promise.race([decoded, new Promise((r) => setTimeout(r, 8000))]).then(() => { ready = true; showSlide(cur); });
+  /* parte subito: il timer di 6 secondi e la barra iniziano insieme, e intanto si
+     "scaldano" le altre due foto così sono già decodificate al primo cambio */
+  if (autoplay) hero.classList.add('is-playing');
+  slides.forEach((img) => { if (img.decode) img.decode().catch(() => {}); });
+  showSlide(0);
 
   /* lo slideshow si ferma quando l'hero non si vede o la scheda è in background */
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(([e]) => {
+      const was = heroVisible;
       heroVisible = e.isIntersecting;
-      if (heroVisible && ready) showSlide(cur); else schedule();
+      if (heroVisible && !was) showSlide(cur); else schedule();
     }, { threshold: 0.15 }).observe(hero);
     /* la barra mobile compare quando l'hero esce: niente soglie sullo scroll, che
        con la barra del browser che appare e scompare farebbero lampeggiare */
@@ -184,7 +195,7 @@
     heroObserved = true;
   }
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && ready && heroVisible) showSlide(cur); else schedule();
+    if (!document.hidden && heroVisible) showSlide(cur); else schedule();
   });
 
   /* ------------------------------------------------------------------
