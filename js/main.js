@@ -168,14 +168,20 @@
     walk(mText);
     words = $$('.w', mText);
   }
+  let lastWords = -1;
   function paintWords() {
     if (!words.length) return;
-    if (reduceMotion) { words.forEach((w) => w.classList.add('on')); return; }
+    if (reduceMotion) {
+      if (lastWords !== words.length) { words.forEach((w) => w.classList.add('on')); lastWords = words.length; }
+      return;
+    }
     const r = mText.getBoundingClientRect();
     const start = innerHeight * 0.85;
     const end = innerHeight * 0.35;
     const p = Math.max(0, Math.min(1, (start - r.top) / (start - end + r.height * 0.6)));
     const n = Math.round(p * words.length);
+    if (n === lastWords) return; /* tocca il DOM solo quando cambia qualcosa */
+    lastWords = n;
     words.forEach((w, i) => w.classList.toggle('on', i < n));
   }
 
@@ -183,9 +189,10 @@
      Parallax leggero
      ------------------------------------------------------------------ */
   const pxEls = $$('[data-parallax]');
+  const narrow = matchMedia('(max-width: 900px), (hover: none)');
   function parallax() {
     paintWords();
-    if (reduceMotion) return;
+    if (reduceMotion || narrow.matches) return; /* su telefono la foto resta ferma */
     const vh = innerHeight;
     pxEls.forEach((el) => {
       const r = el.getBoundingClientRect();
