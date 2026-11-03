@@ -238,15 +238,18 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
   overflow: hidden;
 }
 .hero-bg { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
-/* La foto che esce resta opaca finché quella che entra non è del tutto visibile:
-   niente "buco" scuro a metà dissolvenza, quindi niente pulsazione. */
+/* Le foto sono impilate in ordine fisso: la prima sta sempre sotto ed è sempre opaca,
+   ogni foto successiva sfuma sopra quelle già visibili (.is-on). Nessun buco scuro a
+   metà dissolvenza e nessuno scambio di z-index, che su alcuni telefoni fa lampeggiare. */
 .slide {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  opacity: 0; z-index: 0;
+  opacity: 0;
   transform: scale(1.14);
-  transition: opacity 0s linear 1.4s, transform 0s linear 1.4s;
+  will-change: opacity;
+  transition: opacity 1.2s ease, transform 0s linear 1.2s;
 }
-.slide.is-active { opacity: 1; z-index: 1; transform: scale(1); transition: opacity 1.4s ease, transform 9s ease-out; }
+.slide:first-child, .slide.is-on { opacity: 1; }
+.slide.is-active { transform: scale(1); transition: opacity 1.2s ease, transform 9s ease-out; }
 .hero::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background:
@@ -334,6 +337,7 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 .story .bar::after { content: ""; position: absolute; inset: 0; background: var(--cream); transform: scaleX(0); transform-origin: left; }
 .story.is-done .bar::after { transform: scaleX(1); }
 .story.is-active .bar::after { animation: fill 6s linear forwards; }
+.hero.is-still .story.is-active .bar::after { animation: none; transform: scaleX(1); }
 @keyframes fill { to { transform: scaleX(1); } }
 .story .t { display: block; font-family: var(--ff-display); font-size: 1.25rem; font-weight: 500; line-height: 1; }
 .story .l { display: block; font-size: .8rem; letter-spacing: .06em; margin-top: .25rem; opacity: .85; }
@@ -708,19 +712,29 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
 .lb-next { right: 18px; top: 50%; }
 @media (max-width: 640px) { .lb-prev, .lb-next { top: auto; bottom: 18px; } }
 
+/* Le animazioni infinite (marquee, timbro, orbita, puntina) girano solo mentre il blocco
+   è a schermo: fuori vista costringevano il telefono a ricalcolare lo stile a ogni frame. */
+.js [data-live]:not(.is-live),
+.js [data-live]:not(.is-live) *,
+.js [data-live]:not(.is-live)::before,
+.js [data-live]:not(.is-live) *::before,
+.js [data-live]:not(.is-live) *::after { animation-play-state: paused !important; }
+
 /* ---------- telefoni e dispositivi touch: meno lavoro per la GPU ----------
    Zoom lento sulle foto, grana a schermo intero e sfocati dietro ai pannelli
    fanno scattare l'hero su molti telefoni. Qui restano solo dissolvenze. */
 @media (max-width: 900px), (hover: none) {
   body::before { display: none; }
-  .slide, .slide.is-active { transform: none; }
-  .slide { transition: opacity 0s linear 1.4s; }
-  .slide.is-active { transition: opacity 1.4s ease; }
+  .slide, .slide.is-active { transform: none; transition: opacity 1.2s ease; }
+  .badge-ring { animation: none; }
+  .status.is-open .dot { animation: none; box-shadow: 0 0 0 4px rgba(92, 210, 140, .28); }
+  #progress { display: none; }
+  .day-img, .day-img.is-active { transform: none; }
+  .nav, .nav.is-solid { height: 68px; transition: background .3s, color .3s, box-shadow .3s; }
   .status, .badge::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
   .status { background: rgba(34, 10, 15, .5); }
   .status-dark { background: rgba(110, 31, 43, .07); }
   .badge::before { background: rgba(34, 10, 15, .72); }
-  .badge-ring { will-change: transform; }
   .nav.is-solid { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(244, 239, 228, .97); }
   .mbar { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(34, 10, 15, .96); }
   .arch img { transform: scale(1.12); }

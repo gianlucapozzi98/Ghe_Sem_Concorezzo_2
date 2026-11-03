@@ -6,6 +6,7 @@
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const narrow = matchMedia('(max-width: 900px), (hover: none)'); /* telefoni e touch */
 
   /* ------------------------------------------------------------------
      DATI DEL LOCALE
@@ -80,13 +81,16 @@
   const bar = $('#progress');
   const mbar = $('.mbar');
   let ticking = false;
+  let heroObserved = false;
 
   function onScroll() {
     const y = window.scrollY;
-    const max = document.documentElement.scrollHeight - innerHeight;
     nav.classList.toggle('is-solid', y > 40);
-    bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
-    mbar.classList.toggle('is-on', y > innerHeight * 0.55);
+    if (!narrow.matches) { /* su telefono la barra di avanzamento è nascosta: niente lavoro inutile */
+      const max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
+    }
+    if (!heroObserved) mbar.classList.toggle('is-on', y > innerHeight * 0.55);
     parallax();
     ticking = false;
   }
@@ -125,13 +129,33 @@
   /* ------------------------------------------------------------------
      Hero: stories (tre momenti della giornata)
      ------------------------------------------------------------------ */
+  /* Il cambio di slide è guidato da un timer, non dall'animazione CSS della barra:
+     con "riduci movimento" attivo le animazioni durano 0 ms e le slide si
+     rincorrerebbero a raffica (sfarfallio). Con ?statico lo slideshow resta fermo. */
+  const hero = $('.hero');
   const slides = $$('.slide');
   const stories = $$('.story');
+  const SLIDE_MS = 6000;
+  const autoplay = !reduceMotion && !/[?&]statico\b/.test(location.search);
   let cur = 0;
+  let timer = 0;
+  let ready = false;
+  let heroVisible = true;
+
+  if (!autoplay) hero.classList.add('is-still');
+
+  function schedule() {
+    clearTimeout(timer);
+    if (autoplay && ready && heroVisible && !document.hidden) timer = setTimeout(() => showSlide(cur + 1), SLIDE_MS);
+  }
 
   function showSlide(i) {
     cur = (i + slides.length) % slides.length;
-    slides.forEach((s, k) => s.classList.toggle('is-active', k === cur));
+    /* le foto sotto restano opache: quella nuova sfuma sopra, senza buchi scuri */
+    slides.forEach((s, k) => {
+      s.classList.toggle('is-active', k === cur);
+      s.classList.toggle('is-on', k <= cur);
+    });
     stories.forEach((s, k) => {
       s.classList.remove('is-active');
       s.classList.toggle('is-done', k < cur);
@@ -139,11 +163,42 @@
     });
     void stories[cur].offsetWidth; /* riavvia l'animazione della barra */
     stories[cur].classList.add('is-active');
+    schedule();
   }
-  stories.forEach((s, i) => {
-    s.addEventListener('click', () => showSlide(i));
-    $('.bar', s).addEventListener('animationend', () => showSlide(cur + 1));
+  stories.forEach((s, i) => s.addEventListener('click', () => showSlide(i)));
+
+  /* si parte solo dopo aver decodificato le tre foto: decodificarne una a metà
+     dissolvenza blocca il telefono per un istante e la foto "salta" */
+  const decoded = Promise.all(slides.map((img) => (img.decode ? img.decode().catch(() => {}) : Promise.resolve())));
+  Promise.race([decoded, new Promise((r) => setTimeout(r, 8000))]).then(() => { ready = true; showSlide(cur); });
+
+  /* lo slideshow si ferma quando l'hero non si vede o la scheda è in background */
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => {
+      heroVisible = e.isIntersecting;
+      if (heroVisible && ready) showSlide(cur); else schedule();
+    }, { threshold: 0.15 }).observe(hero);
+    /* la barra mobile compare quando l'hero esce: niente soglie sullo scroll, che
+       con la barra del browser che appare e scompare farebbero lampeggiare */
+    new IntersectionObserver(([e]) => mbar.classList.toggle('is-on', !e.isIntersecting), { threshold: 0.45 }).observe(hero);
+    heroObserved = true;
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && ready && heroVisible) showSlide(cur); else schedule();
   });
+
+  /* ------------------------------------------------------------------
+     Animazioni infinite: partono solo quando il blocco è a schermo
+     ------------------------------------------------------------------ */
+  const liveEls = $$('[data-live]');
+  if ('IntersectionObserver' in window) {
+    const lo = new IntersectionObserver((entries) => {
+      entries.forEach((e) => e.target.classList.toggle('is-live', e.isIntersecting));
+    }, { rootMargin: '80px' });
+    liveEls.forEach((el) => lo.observe(el));
+  } else {
+    liveEls.forEach((el) => el.classList.add('is-live'));
+  }
 
   /* ------------------------------------------------------------------
      Manifesto: le parole si accendono mentre scorri
@@ -189,7 +244,6 @@
      Parallax leggero
      ------------------------------------------------------------------ */
   const pxEls = $$('[data-parallax]');
-  const narrow = matchMedia('(max-width: 900px), (hover: none)');
   function parallax() {
     paintWords();
     if (reduceMotion || narrow.matches) return; /* su telefono la foto resta ferma */
