@@ -31,7 +31,7 @@ Oppure trascina la cartella su vercel.com/new.
 
 ## Cose da aggiornare
 
-**Menu del giorno** (ogni giorno, 1 minuto). In `index.html`, sezione `id="menu"`: ogni piatto è un `<li>` con nome e descrizione. Aggiungi, togli o modifica gli `<li>`. Aggiorna anche la data nei due punti con `data-menu-date` (sotto il titolo e sullo scontrino).
+**Menu del giorno**. Lo aggiorna il locale dal foglio Google "Ghe sem · Menu del giorno" (anche dall'app Fogli sul telefono): una riga "Data del menu" e poi una riga per piatto, con Categoria (Primi, Secondi, Contorni, Dolce), Piatto e Descrizione. Il sito legge il foglio a ogni visita tramite il link CSV in `MENU_CSV`, in cima a `js/main.js`; le modifiche si vedono entro qualche minuto. Se il link è vuoto o il foglio non risponde, il sito mostra il menu scritto in `index.html` (sezione `id="menu"`, con la data nei punti `data-menu-date`): conviene aggiornarlo ogni tanto, perché è quello che vede chi ha JavaScript spento.
 
 **Orari**. Vanno cambiati in quattro posti:
 1. la tabella in `id="dove"` (`index.html`)

@@ -25,6 +25,10 @@
   const DAY_NAMES = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
   const PRICE = 13;
   const ADDRESS = 'Via Remo Brambilla 23, Concorezzo';
+  /* Menu del giorno: link CSV del foglio Google "Ghe sem · Menu del giorno"
+     (nel foglio: File → Condividi → Pubblica sul web → la scheda del menu → Valori separati da virgola (.csv)).
+     Se è vuoto, o se il foglio non risponde, resta il menu scritto in index.html. */
+  const MENU_CSV = '';
 
   const fmt = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
 
@@ -346,7 +350,9 @@
   const chosen = { primi: null, secondi: null, contorni: null };
   const ticket = $('[data-ticket]');
   const pill = $('.pill-ticket');
-  const dishBtns = $$('.dish');
+  const menuLists = $('.menu-lists');
+  let dishBtns = $$('.dish');
+  let activeCats = CATS.slice(); /* le categorie che oggi hanno almeno un piatto */
 
   const dishName = (btn) => $('.dish-name', btn).textContent.trim();
   const dishFull = (btn) => {
@@ -366,7 +372,9 @@
 
   function renderTicket(changedCat, silent) {
     CATS.forEach((cat) => {
-      const b = $(`[data-slot="${cat}"] b`);
+      const li = $(`[data-slot="${cat}"]`);
+      li.hidden = !activeCats.includes(cat);
+      const b = $('b', li);
       const btn = chosen[cat];
       b.textContent = btn ? dishFull(btn) : 'da scegliere';
       b.classList.toggle('empty', !btn);
@@ -374,29 +382,34 @@
         b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
       }
     });
-    const n = CATS.filter((c) => chosen[c]).length;
-    $('[data-progress]').textContent = n === 3 ? 'Il tuo pranzo è pronto' : `${n} di 3 scelti`;
-    ticket.classList.toggle('is-complete', n === 3);
-    $('[data-pill]').textContent = `${n}/3`;
+    const need = activeCats.length;
+    const n = activeCats.filter((c) => chosen[c]).length;
+    $('[data-progress]').textContent = n === need ? 'Il tuo pranzo è pronto' : `${n} di ${need} scelti`;
+    ticket.classList.toggle('is-complete', need > 0 && n === need);
+    $('[data-pill]').textContent = `${n}/${need}`;
 
-    const lines = CATS.filter((c) => chosen[c]).map((c) => `• ${LABEL[c]}: ${dishFull(chosen[c])}`);
+    const lines = activeCats.filter((c) => chosen[c]).map((c) => `• ${LABEL[c]}: ${dishFull(chosen[c])}`);
     const text = lines.length
       ? `Pranzo da Ghe sem? (${ADDRESS})\n${lines.join('\n')}\n${PRICE} € con primo, secondo e contorno. Chi viene?`
       : `Pranzo da Ghe sem? ${ADDRESS}. Menu del giorno a ${PRICE} € con primo, secondo e contorno. Chi viene?`;
     $('#waShare').href = `https://wa.me/?text=${encodeURIComponent(text)}`;
   }
 
-  dishBtns.forEach((btn) => btn.addEventListener('click', () => pick(btn.dataset.cat, btn)));
+  /* un solo ascoltatore per tutti i piatti: funziona anche quando arrivano dal foglio */
+  menuLists.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dish');
+    if (btn) pick(btn.dataset.cat, btn);
+  });
 
   $('#rnd').addEventListener('click', () => {
     const rand = (cat) => {
       const list = dishBtns.filter((b) => b.dataset.cat === cat);
       return list[Math.floor(Math.random() * list.length)];
     };
-    const set = (btn) => { if (chosen[btn.dataset.cat] !== btn) pick(btn.dataset.cat, btn, true); };
+    const set = (btn) => { if (btn && chosen[btn.dataset.cat] !== btn) pick(btn.dataset.cat, btn, true); };
     let n = 0;
     const spin = setInterval(() => {
-      CATS.forEach((c) => set(rand(c)));
+      activeCats.forEach((c) => set(rand(c)));
       if (++n >= 8) { clearInterval(spin); renderTicket('', true); }
     }, 90);
   });
@@ -409,7 +422,135 @@
     const mo = new IntersectionObserver((es) => { state.menu = es[0].isIntersecting; sync(); }, { threshold: 0.05 });
     const to = new IntersectionObserver((es) => { state.ticket = es[0].isIntersecting; sync(); }, { threshold: 0.2 });
     mo.observe($('#menu')); to.observe($('#ticket'));
-    dishBtns.forEach((b) => b.addEventListener('click', sync));
+    menuLists.addEventListener('click', sync);
+  }
+
+  /* ------------------------------------------------------------------
+     Menu dal foglio Google
+     Il foglio ha una riga "Data del menu" e poi una riga per piatto:
+     Categoria (Primi, Secondi, Contorni, Dolce) · Piatto · Descrizione.
+     Righe vuote, intestazioni e altre colonne vengono ignorate.
+     ------------------------------------------------------------------ */
+  const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], cell = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') quoted = false; else cell += c;
+      } else if (c === '"') quoted = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+
+  function categoryOf(label) {
+    const s = label.trim().toLowerCase();
+    if (s.startsWith('prim')) return 'primi';
+    if (s.startsWith('second')) return 'secondi';
+    if (s.startsWith('contorn')) return 'contorni';
+    if (s.startsWith('dolc')) return 'dolce';
+    if (s.startsWith('data')) return 'data';
+    return null;
+  }
+
+  function readMenu(rows) {
+    const menu = { primi: [], secondi: [], contorni: [], dolce: [], date: '' };
+    rows.forEach(([a = '', b = '', c = '']) => {
+      const cat = categoryOf(a);
+      if (cat === 'data') { if (!menu.date) menu.date = b.trim(); return; }
+      if (cat && b.trim()) menu[cat].push({ name: b.trim(), desc: c.trim() });
+    });
+    return menu;
+  }
+
+  /* oggi a Roma, come anno-mese-giorno */
+  function romeToday() {
+    const [y, m, d] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' })
+      .format(new Date()).split('-').map(Number);
+    return { y, m, d };
+  }
+
+  /* accetta 6/11/2026, 06-11-26, 6/11, 2026-11-06 e "venerdì 6 novembre" */
+  function parseMenuDate(text) {
+    const s = text.trim().toLowerCase();
+    let y = null, m = null, d = null, r;
+    if ((r = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) { y = +r[1]; m = +r[2]; d = +r[3]; }
+    else if ((r = s.match(/(\d{1,2})[/.-](\d{1,2})(?:[/.-](\d{2,4}))?/))) { d = +r[1]; m = +r[2]; y = r[3] ? +r[3] : null; }
+    else if ((r = s.match(/(\d{1,2})\s+([a-zàèéìòù]{3,})(?:\s+(\d{4}))?/))) {
+      d = +r[1]; m = MONTHS.findIndex((n) => n.startsWith(r[2].slice(0, 3))) + 1; y = r[3] ? +r[3] : null;
+    }
+    if (!d || !m || d > 31 || m > 12) return null;
+    if (y !== null && y < 100) y += 2000;
+    if (y === null) y = romeToday().y;
+    return { y, m, d };
+  }
+
+  function showMenuDate(text) {
+    const when = $$('[data-menu-when]');
+    when.forEach((el) => { el.hidden = !text; });
+    if (!text) return;
+    const p = parseMenuDate(text);
+    const t = romeToday();
+    const label = p ? `${DAY_NAMES[new Date(Date.UTC(p.y, p.m - 1, p.d)).getUTCDay()]} ${p.d} ${MONTHS[p.m - 1]}` : text;
+    const isToday = p && p.y === t.y && p.m === t.m && p.d === t.d;
+    $$('[data-menu-date]').forEach((el) => {
+      el.textContent = isToday && el.closest('.sec-sub') ? `oggi, ${label}` : label;
+    });
+  }
+
+  function makeDish(cat, dish) {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'dish'; btn.type = 'button'; btn.dataset.cat = cat;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = '<span class="dish-check" aria-hidden="true"></span><span class="dish-text"><span class="dish-name"></span><span class="dish-desc"></span></span>';
+    /* i testi del foglio entrano sempre come testo, mai come HTML */
+    $('.dish-name', btn).textContent = dish.name;
+    $('.dish-desc', btn).textContent = dish.desc;
+    li.appendChild(btn);
+    return li;
+  }
+
+  function renderMenu(menu) {
+    CATS.forEach((cat) => {
+      const sec = $(`.cat[data-cat="${cat}"]`);
+      $('.dishes', sec).replaceChildren(...menu[cat].map((d) => makeDish(cat, d)));
+      sec.hidden = !menu[cat].length;
+      chosen[cat] = null;
+    });
+    const dolce = $('.cat-dolce');
+    $('.dolce', dolce).replaceChildren(...menu.dolce.map((d) => {
+      const el = document.createElement('span');
+      el.className = 'dish-name';
+      el.textContent = d.desc ? `${d.name} ${d.desc}` : d.name;
+      return el;
+    }));
+    $('#h-dolce').textContent = menu.dolce.length > 1 ? 'Dolci del giorno' : 'Dolce del giorno';
+    dolce.hidden = !menu.dolce.length;
+
+    activeCats = CATS.filter((c) => menu[c].length);
+    dishBtns = $$('.dish');
+    showMenuDate(menu.date);
+    renderTicket('', true);
+  }
+
+  if (MENU_CSV) {
+    fetch(MENU_CSV, { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`menu: ${r.status}`))))
+      .then((text) => {
+        const menu = readMenu(parseCSV(text));
+        /* un foglio vuoto o una pagina di errore non cancellano il menu della pagina */
+        if (CATS.some((c) => menu[c].length)) renderMenu(menu);
+      })
+      .catch(() => { /* resta il menu scritto in index.html */ });
   }
 
   /* ------------------------------------------------------------------
