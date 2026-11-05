@@ -111,6 +111,42 @@
   addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
 
   /* ------------------------------------------------------------------
+     Link interni (#eventi, #menu, #top...): la pagina scorre alla sezione
+     ma l'indirizzo resta pulito, senza il # in fondo
+     ------------------------------------------------------------------ */
+  const cleanUrl = () => location.pathname + location.search;
+  function goTo(target, smooth) {
+    const root = document.documentElement;
+    if (!smooth) root.style.scrollBehavior = 'auto';
+    if (target.id === 'top') window.scrollTo(0, 0); else target.scrollIntoView();
+    if (!smooth) root.style.scrollBehavior = '';
+    /* chi usa la tastiera riparte da lì, come con un link normale */
+    if (!target.matches('a, button, input, [tabindex]')) target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+  }
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest('a[href^="#"]');
+    const target = a && a.getAttribute('href').length > 1 && document.getElementById(a.getAttribute('href').slice(1));
+    if (!target) return;
+    e.preventDefault();
+    goTo(target, true);
+  });
+  /* chi arriva da un link con il # (es. ghesem.../#eventi) finisce comunque sulla sezione */
+  if (location.hash) {
+    const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    history.replaceState(null, '', cleanUrl());
+    if (target) {
+      goTo(target, false);
+      /* foto e font possono spostare la pagina mentre arrivano: a caricamento finito si
+         riallinea, a meno che il visitatore non abbia già iniziato a scorrere da solo */
+      let moved = false;
+      ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, () => { moved = true; }, { once: true, passive: true }));
+      addEventListener('load', () => { if (!moved) goTo(target, false); }, { once: true });
+    }
+  }
+
+  /* ------------------------------------------------------------------
      Reveal allo scroll
      ------------------------------------------------------------------ */
   const reveals = $$('[data-reveal]');
