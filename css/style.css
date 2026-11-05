@@ -636,7 +636,8 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 /* ==========================================================================
    EVENTI
    ========================================================================== */
-.events { background: var(--wine); color: var(--cream); }
+/* subito sotto la striscia bordeaux che scorre: un bordeaux più scuro, così le due fasce non si fondono */
+.events { background: var(--wine-deep); color: var(--cream); }
 /* luce calda dall'alto, come in sala a fine giornata */
 .events::before {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
