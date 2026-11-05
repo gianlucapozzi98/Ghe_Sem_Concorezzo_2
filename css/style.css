@@ -32,7 +32,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 84px;
+  scroll-padding-top: 90px;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -162,14 +162,14 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
    ========================================================================== */
 .nav {
   position: fixed; inset: 0 0 auto 0; z-index: 150;
-  height: 80px;
+  height: 88px;
   display: flex; align-items: center;
   color: var(--cream);
   transition: background .4s, color .4s, box-shadow .4s, height .4s;
 }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
 .nav.is-solid {
-  height: 66px;
+  height: 70px;
   background: rgba(244, 239, 228, .86);
   -webkit-backdrop-filter: saturate(1.4) blur(14px);
   backdrop-filter: saturate(1.4) blur(14px);
@@ -180,13 +180,14 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
    crema sopra le foto dell'hero e inchiostro sulla barra chiara */
 .logo {
   display: block; flex: none;
-  height: 70px; aspect-ratio: 459 / 253;
+  height: 62px; aspect-ratio: 459 / 253;
   background-color: currentColor;
   -webkit-mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
           mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
   transition: height .4s var(--ease);
 }
-.nav.is-solid .logo { height: 56px; }
+.nav.is-solid .logo { height: 50px; }
+/* barra 88/70 px e logo 62/50 px: circa 12 px d'aria sopra e sotto il logo */
 .nav-links { display: flex; gap: 2.2rem; font-size: .92rem; font-weight: 500; }
 .nav-links a { position: relative; padding: .4rem 0; text-decoration: none; }
 .nav-links a::after {
@@ -357,13 +358,13 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
   .hero-title { margin-top: 2.8rem; }
   .hand { left: auto; right: 6px; top: -1.45em; }
   .hand svg { display: none; }
-  .badge { width: 104px; bottom: auto; top: 92px; }
+  .badge { width: 104px; bottom: auto; top: 98px; }
   .hero-inner { padding-bottom: 150px; }
   .hero-cta .btn-ghost { display: none; }
 }
 
 @media (max-width: 400px) {
-  .badge { width: 88px; top: 76px; }
+  .badge { width: 88px; top: 84px; }
   .badge-core b { font-size: 2.2rem; }
   .badge-core i { font-size: 1.05rem; }
 }
@@ -457,7 +458,7 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 .chips li { padding: .45rem .95rem; border: 1px solid rgba(244, 239, 228, .28); border-radius: 99px; font-size: .85rem; font-weight: 500; }
 
 @media (max-width: 899px) {
-  .day-media { top: 70px; height: 38vh; height: 38svh; min-height: 260px; border-radius: 22px; }
+  .day-media { top: 80px; height: 38vh; height: 38svh; min-height: 260px; border-radius: 22px; }
   .clock { height: 4.6rem; left: 1.1rem; }
   .clock span { font-size: 4.2rem; }
   .day-step { min-height: 56vh; min-height: 56svh; justify-content: flex-start; padding-top: 2.6rem; }
@@ -827,8 +828,8 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
    telefoni pesano molto e fanno scattare lo scroll. */
 @media (max-width: 900px), (hover: none) {
   body::before { display: none; }
-  .nav, .nav.is-solid { height: 68px; transition: background .3s, color .3s, box-shadow .3s; }
-  .logo, .nav.is-solid .logo { height: 58px; }
+  .nav, .nav.is-solid { height: 74px; transition: background .3s, color .3s, box-shadow .3s; }
+  .logo, .nav.is-solid .logo { height: 52px; }
   .status, .badge::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
   .status { background: rgba(34, 10, 15, .5); }
   .status-dark { background: rgba(110, 31, 43, .07); }
