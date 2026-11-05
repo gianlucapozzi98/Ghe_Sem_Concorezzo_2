@@ -6,7 +6,6 @@
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const narrow = matchMedia('(max-width: 900px), (hover: none)'); /* telefoni e touch */
 
   /* ------------------------------------------------------------------
      DATI DEL LOCALE
@@ -86,10 +85,8 @@
   function onScroll() {
     const y = window.scrollY;
     nav.classList.toggle('is-solid', y > 40);
-    if (!narrow.matches) { /* su telefono la barra di avanzamento è nascosta: niente lavoro inutile */
-      const max = document.documentElement.scrollHeight - innerHeight;
-      bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
-    }
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
     if (!heroObserved) mbar.classList.toggle('is-on', y > innerHeight * 0.55);
     parallax();
     ticking = false;
@@ -257,7 +254,7 @@
   const pxEls = $$('[data-parallax]');
   function parallax() {
     paintWords();
-    if (reduceMotion || narrow.matches) return; /* su telefono la foto resta ferma */
+    if (reduceMotion) return;
     const vh = innerHeight;
     pxEls.forEach((el) => {
       const r = el.getBoundingClientRect();

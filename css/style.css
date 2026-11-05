@@ -814,17 +814,11 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
 .js [data-live]:not(.is-live) *::after { animation-play-state: paused !important; }
 
 /* ---------- telefoni e dispositivi touch: meno lavoro per la GPU ----------
-   Zoom lento sulle foto, grana a schermo intero e sfocati dietro ai pannelli
-   fanno scattare l'hero su molti telefoni. Qui restano solo dissolvenze. */
+   Le animazioni sono le stesse del desktop. Qui si tolgono solo la grana a
+   schermo intero e gli sfocati dietro ai pannelli: non si muovono, ma sui
+   telefoni pesano molto e fanno scattare lo scroll. */
 @media (max-width: 900px), (hover: none) {
   body::before { display: none; }
-  /* zoom lento anche su telefono, ma più corto e più lento: la foto non resta ferma */
-  .slide { transform: scale(1.08); }
-  .slide.is-active { transition: opacity 1.2s ease, transform 12s ease-out; }
-  .badge-ring { animation: none; }
-  .status.is-open .dot { animation: none; box-shadow: 0 0 0 4px rgba(92, 210, 140, .28); }
-  #progress { display: none; }
-  .day-img, .day-img.is-active { transform: none; }
   .nav, .nav.is-solid { height: 68px; transition: background .3s, color .3s, box-shadow .3s; }
   .status, .badge::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
   .status { background: rgba(34, 10, 15, .5); }
@@ -832,7 +826,6 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
   .badge::before { background: rgba(34, 10, 15, .72); }
   .nav.is-solid { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(244, 239, 228, .97); }
   .mbar { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(34, 10, 15, .96); }
-  .arch img { transform: scale(1.12); }
 }
 
 /* ---------- movimento ridotto ---------- */
