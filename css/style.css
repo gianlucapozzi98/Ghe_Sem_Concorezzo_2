@@ -174,14 +174,17 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
   color: var(--ink);
   box-shadow: 0 1px 0 rgba(43, 42, 40, .08);
 }
+/* il logo vero, ricalcato dall'insegna: una sola forma che prende il colore del testo,
+   crema sopra le foto dell'hero e inchiostro sulla barra chiara */
 .logo {
-  font-family: var(--ff-display); font-weight: 600; font-size: 1.75rem; letter-spacing: -.03em;
-  text-decoration: none; white-space: nowrap;
-  font-variation-settings: "SOFT" 100, "WONK" 1;
+  display: block; flex: none;
+  height: 70px; aspect-ratio: 459 / 253;
+  background-color: currentColor;
+  -webkit-mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
+          mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
+  transition: height .4s var(--ease);
 }
-.logo em { font-weight: 400; }
-.logo i { font-style: normal; color: var(--ochre); }
-.nav.is-solid .logo i { color: var(--wine); }
+.nav.is-solid .logo { height: 56px; }
 .nav-links { display: flex; gap: 2.2rem; font-size: .92rem; font-weight: 500; }
 .nav-links a { position: relative; padding: .4rem 0; text-decoration: none; }
 .nav-links a::after {
@@ -210,7 +213,6 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 }
 .menu-open .mnav { clip-path: circle(150% at calc(100% - 40px) 40px); visibility: visible; transition: clip-path .7s var(--ease), visibility 0s; }
 .menu-open .nav { color: var(--cream); background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
-.menu-open .nav .logo i { color: var(--ochre); }
 .mnav nav { display: grid; gap: .3rem; }
 .mnav nav a {
   font-family: var(--ff-display); font-size: clamp(2.2rem, 9vw, 3.4rem); text-decoration: none; letter-spacing: -.03em;
@@ -757,6 +759,13 @@ address { font-style: normal; font-family: var(--ff-display); font-size: clamp(1
 footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 2rem; overflow: hidden; }
 .foot-top { display: grid; gap: 3rem; }
 @media (min-width: 900px) { .foot-top { grid-template-columns: 1fr 1.2fr; align-items: end; } }
+/* il logo sopra il saluto, crema come il resto del footer */
+.foot-logo {
+  display: block; width: clamp(200px, 22vw, 280px); aspect-ratio: 459 / 253; margin-bottom: 1.8rem;
+  background-color: var(--cream);
+  -webkit-mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
+          mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
+}
 .foot-lede { font-family: var(--ff-display); font-size: clamp(2.2rem, 4.6vw, 4rem); font-style: italic; line-height: 1; letter-spacing: -.035em; font-variation-settings: "SOFT" 100, "WONK" 1; }
 .foot-sub { margin-top: .8rem; color: rgba(244, 239, 228, .6); letter-spacing: .12em; text-transform: uppercase; font-size: .8rem; }
 .foot-cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
@@ -764,14 +773,7 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
 .foot-cols p { color: rgba(244, 239, 228, .82); font-size: .98rem; }
 .foot a { text-decoration: none; }
 .foot-cols a:hover { color: var(--ochre); }
-.foot-mark {
-  font-family: var(--ff-display); font-weight: 600; line-height: .8; letter-spacing: -.06em;
-  font-size: clamp(6rem, 27vw, 26rem); margin: clamp(40px, 6vw, 80px) 0 0 -.04em; white-space: nowrap;
-  color: transparent; -webkit-text-stroke: 1.5px rgba(244, 239, 228, .22);
-  font-variation-settings: "SOFT" 100, "WONK" 1;
-  user-select: none;
-}
-.foot-legal { margin-top: 1rem; padding-top: 1.2rem; border-top: 1px solid rgba(244, 239, 228, .14); font-size: .8rem; color: rgba(244, 239, 228, .5); }
+.foot-legal { margin-top: clamp(56px, 7vw, 96px); padding-top: 1.2rem; border-top: 1px solid rgba(244, 239, 228, .14); font-size: .8rem; color: rgba(244, 239, 228, .5); }
 
 /* ==========================================================================
    BARRA MOBILE · LIGHTBOX
@@ -820,6 +822,7 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
 @media (max-width: 900px), (hover: none) {
   body::before { display: none; }
   .nav, .nav.is-solid { height: 68px; transition: background .3s, color .3s, box-shadow .3s; }
+  .logo, .nav.is-solid .logo { height: 58px; }
   .status, .badge::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
   .status { background: rgba(34, 10, 15, .5); }
   .status-dark { background: rgba(110, 31, 43, .07); }

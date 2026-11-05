@@ -6,7 +6,9 @@ Sito statico: HTML, CSS e JavaScript, senza build né dipendenze.
 index.html      contenuti e struttura
 css/style.css   stile (palette e font in cima al file)
 js/main.js      comportamento (orari in cima al file)
-favicon.svg
+img/logo-ghe-sem.svg   logo (ricalcato dall'insegna), usato nel menu e nel footer
+favicon.svg            icona della scheda (il calice del logo)
+favicon-32.png, apple-touch-icon.png   la stessa icona in PNG, per Safari e iPhone
 ```
 
 ## Vederlo in locale
