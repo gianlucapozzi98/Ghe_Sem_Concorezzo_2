@@ -828,13 +828,13 @@ footer.foot { background: var(--wine-ink); color: var(--cream); padding-bottom: 
   .mbar { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(34, 10, 15, .96); }
 }
 
-/* ---------- movimento ridotto ---------- */
+/* ---------- movimento ridotto ----------
+   Con "Riduci movimento" (iPhone) o "Rimuovi animazioni" (Android) attivo, le
+   animazioni del sito restano: si tolgono solo lo zoom lento delle foto e lo
+   scorrimento morbido della pagina, i movimenti ampi che danno fastidio a chi
+   soffre di vertigini. Il parallax si spegne in js/main.js. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0ms !important; }
-  .marquee-track { animation: none; }
-  .ch, .hand { opacity: 1; transform: none; }
-  /* la dissolvenza tra le foto resta (nessun movimento), lo zoom no */
-  .slide, .slide.is-active { transform: none; transition: opacity 1.2s ease !important; }
-  .hero.is-playing .story.is-active .bar::after { animation-duration: 6s !important; }
+  .slide, .slide.is-active { transform: none; transition: opacity 1.2s ease; }
+  .day-img, .day-img.is-active { transform: none; }
 }

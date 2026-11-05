@@ -5,6 +5,8 @@
 
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
+  /* Con "Riduci movimento" (iPhone) o "Rimuovi animazioni" (Android) le animazioni
+     restano tutte: si spegne solo il parallax. Lo zoom lento delle foto si spegne nel CSS. */
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ------------------------------------------------------------------
@@ -112,7 +114,7 @@
      Reveal allo scroll
      ------------------------------------------------------------------ */
   const reveals = $$('[data-reveal]');
-  if (reduceMotion || !('IntersectionObserver' in window)) {
+  if (!('IntersectionObserver' in window)) {
     reveals.forEach((el) => el.classList.add('is-in'));
   } else {
     const io = new IntersectionObserver((entries) => {
@@ -127,9 +129,8 @@
      Hero: stories (tre momenti della giornata)
      ------------------------------------------------------------------ */
   /* Il cambio di slide è guidato da un timer, non dall'animazione CSS della barra:
-     con "riduci movimento" attivo le animazioni durano 0 ms e le slide si
-     rincorrerebbero a raffica (sfarfallio). La dissolvenza resta anche con
-     "riduci movimento" (è un cambio di foto, non un movimento); lo zoom no.
+     se un browser accorcia le animazioni a 0 ms le slide si rincorrerebbero a
+     raffica (sfarfallio). Con "riduci movimento" resta la dissolvenza, lo zoom no.
      Con ?statico lo slideshow resta fermo. */
   const hero = $('.hero');
   const slides = $$('.slide');
@@ -234,10 +235,6 @@
   let lastWords = -1;
   function paintWords() {
     if (!words.length) return;
-    if (reduceMotion) {
-      if (lastWords !== words.length) { words.forEach((w) => w.classList.add('on')); lastWords = words.length; }
-      return;
-    }
     const r = mText.getBoundingClientRect();
     const start = innerHeight * 0.85;
     const end = innerHeight * 0.35;
@@ -268,7 +265,7 @@
      Contatori
      ------------------------------------------------------------------ */
   const counters = $$('[data-count]');
-  if (!reduceMotion && 'IntersectionObserver' in window) {
+  if ('IntersectionObserver' in window) {
     const co = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (!e.isIntersecting) return;
@@ -337,7 +334,7 @@
       const btn = chosen[cat];
       b.textContent = btn ? dishFull(btn) : 'da scegliere';
       b.classList.toggle('empty', !btn);
-      if (btn && cat === changedCat && !silent && !reduceMotion) {
+      if (btn && cat === changedCat && !silent) {
         b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
       }
     });
@@ -361,7 +358,6 @@
       return list[Math.floor(Math.random() * list.length)];
     };
     const set = (btn) => { if (chosen[btn.dataset.cat] !== btn) pick(btn.dataset.cat, btn, true); };
-    if (reduceMotion) { CATS.forEach((c) => set(rand(c))); return; }
     let n = 0;
     const spin = setInterval(() => {
       CATS.forEach((c) => set(rand(c)));
