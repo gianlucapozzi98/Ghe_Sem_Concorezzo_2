@@ -88,9 +88,47 @@
   let ticking = false;
   let heroObserved = false;
 
+  /* ------------------------------------------------------------------
+     Il logo grande dell'hero: scorrendo sale insieme alla pagina e si
+     rimpicciolisce fino al posto del logo nella barra. Arrivato lì, il logo
+     della barra prende il suo posto e la barra diventa piena.
+     ------------------------------------------------------------------ */
+  const heroLogo = $('.hero-logo');
+  const navLogo = $('.nav .logo');
+  let logoHome = null; /* dov'è il logo grande a pagina ferma, e quanto è alto */
+  let flyEnd = 40;     /* da qui in giù il logo è nella barra */
+
+  function measureLogo() {
+    if (!heroLogo) return;
+    heroLogo.style.transform = '';
+    const r = heroLogo.getBoundingClientRect();
+    const t = navLogo.getBoundingClientRect();
+    logoHome = { x: r.left, y: r.top + window.scrollY, h: r.height };
+    flyEnd = Math.max(80, logoHome.y - t.top);
+  }
+
+  const heroHand = $('.hand');
+  function flyLogo(y) {
+    if (!logoHome) return;
+    const docked = y >= flyEnd;
+    const p = Math.min(1, Math.max(0, y) / flyEnd);
+    document.body.classList.toggle('logo-docked', docked);
+    heroLogo.classList.toggle('is-docked', docked);
+    /* la nota "in dialetto: ci siamo!" indica il logo: sparisce appena il logo parte.
+       Si usa filter perché l'opacità è già occupata dall'animazione di entrata. */
+    if (heroHand) heroHand.style.filter = p > 0 ? `opacity(${Math.max(0, 1 - p * 3).toFixed(2)})` : '';
+    if (docked || reduceMotion) { heroLogo.style.transform = ''; return; }
+    const t = navLogo.getBoundingClientRect();
+    const s = 1 + (t.height / logoHome.h - 1) * p;
+    const dx = (t.left - logoHome.x) * p;
+    const dy = (t.top - logoHome.y + flyEnd) * p; /* quasi zero: il logo sale con la pagina */
+    heroLogo.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${s.toFixed(4)})`;
+  }
+
   function onScroll() {
     const y = window.scrollY;
-    nav.classList.toggle('is-solid', y > 40);
+    flyLogo(y);
+    nav.classList.toggle('is-solid', y >= flyEnd);
     const max = document.documentElement.scrollHeight - innerHeight;
     bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
     if (!heroObserved) mbar.classList.toggle('is-on', y > innerHeight * 0.55);
@@ -98,7 +136,11 @@
     ticking = false;
   }
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
-  addEventListener('resize', onScroll);
+  addEventListener('resize', () => { measureLogo(); onScroll(); });
+  /* i font cambiano di poco l'altezza dei testi dell'hero: si rimisura quando sono pronti */
+  measureLogo();
+  if (document.fonts) document.fonts.ready.then(() => { measureLogo(); onScroll(); });
+  addEventListener('load', () => { measureLogo(); onScroll(); });
 
   /* menu mobile */
   const burger = $('.burger');

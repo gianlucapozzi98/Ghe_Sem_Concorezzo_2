@@ -187,6 +187,8 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
   transition: height .4s var(--ease);
 }
 .nav.is-solid .logo { height: 50px; }
+.js .nav .logo { opacity: 0; pointer-events: none; }
+.js .logo-docked .nav .logo, .js .menu-open .nav .logo { opacity: 1; pointer-events: auto; }
 /* barra 88/70 px e logo 62/50 px: circa 12 px d'aria sopra e sotto il logo */
 .nav-links { display: flex; gap: 2.2rem; font-size: .92rem; font-weight: 500; }
 .nav-links a { position: relative; padding: .4rem 0; text-decoration: none; }
@@ -266,35 +268,34 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 .hero-inner { padding: 140px 0 clamp(130px, 19vh, 190px); }
 
 .hero-title { position: relative; display: inline-block; margin: .4rem 0 1.6rem; }
-.hero h1 {
-  font-size: clamp(5.4rem, 18.5vw, 17rem);
-  line-height: .82; letter-spacing: -.05em; font-weight: 500;
-  font-variation-settings: "SOFT" 100, "WONK" 1;
-  display: flex; flex-wrap: wrap; column-gap: .22em;
-  margin-left: -.04em;
+/* il logo al posto del titolo, grande quanto era la parola "Ghe".
+   Scorrendo, js/main.js lo fa salire e rimpicciolire fino al suo posto nella barra. */
+.hero-logo {
+  display: block;
+  width: clamp(8.1rem, 27.75vw, 25.5rem); aspect-ratio: 459 / 253;
+  transform-origin: 0 0;
 }
-.hero h1 .word { display: inline-flex; }
-.ch {
-  display: inline-block;
-  transform: translateY(105%) rotate(6deg);
-  opacity: 0;
-  animation: chIn 1.1s var(--ease) forwards;
-  animation-delay: calc(var(--i) * 70ms + 200ms);
+.hero-logo.is-docked { visibility: hidden; }
+.hero-mark {
+  display: block; width: 100%; height: 100%;
+  background-color: var(--cream);
+  -webkit-mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
+          mask: url("../img/logo-ghe-sem.svg") center / contain no-repeat;
+  animation: logoIn 1.2s var(--ease) .15s both;
 }
-.hero h1 { overflow: hidden; padding-bottom: .06em; }
-.dotch { color: var(--ochre); }
-@keyframes chIn { to { transform: none; opacity: 1; } }
+@keyframes logoIn { from { opacity: 0; transform: translateY(26px) scale(.96); } }
 
+/* il biglietto scritto a mano, a destra del logo, con la freccia verso "Sem" */
 .hand {
-  position: absolute; left: 63%; top: -.1em;
-  font-family: var(--ff-hand); font-size: clamp(1.5rem, 3.1vw, 2.7rem); font-weight: 600; line-height: 1;
+  position: absolute; left: calc(100% + .2em); top: .5em;
+  font-family: var(--ff-hand); font-size: clamp(1.5rem, 2.6vw, 2.5rem); font-weight: 600; line-height: 1;
   color: var(--ochre);
   white-space: nowrap;
   transform: rotate(-7deg);
   opacity: 0;
-  animation: fadeUp 1s var(--ease) 1.3s forwards;
+  animation: fadeUp 1s var(--ease) 1.2s forwards;
 }
-.hand svg { position: absolute; left: 62%; top: 108%; width: 1.7em; height: auto; transform: rotate(8deg); }
+.hand svg { position: absolute; left: -.4em; top: 115%; width: 1.5em; height: auto; transform: scaleX(-1) rotate(-14deg); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px) rotate(-7deg); } to { opacity: 1; transform: rotate(-7deg); } }
 
 .hero-lede { font-size: clamp(1.15rem, 1.8vw, 1.5rem); max-width: 30em; color: rgba(244, 239, 228, .92); line-height: 1.5; }
@@ -350,16 +351,26 @@ section, footer.foot { position: relative; padding-block: var(--pad) calc(var(--
 
 @media (max-width: 760px) {
   .br-d { display: none; }
-  /* "Café & bistrot" e sotto "Concorezzo (MB)": il timbro 13 € resta a destra, senza coprire il testo */
-  .hero .kicker { align-items: flex-start; }
-  .hero .kicker::before { margin-top: .72em; }
+  /* telefono: il logo sta al centro esatto della prima schermata, con "Café & bistrot /
+     Concorezzo (MB)" sopra e il resto sotto. 3.54rem = le due righe del kicker e il suo margine. */
+  .hero { align-items: flex-start; }
+  .hero-inner {
+    --logo-w: min(74vw, 300px);
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: calc(50vh - var(--logo-w) * 253 / 459 / 2 - 3.54rem) 0 112px;
+    padding-top: calc(50svh - var(--logo-w) * 253 / 459 / 2 - 3.54rem);
+  }
+  .hero .kicker { margin: 0 auto 1.2rem; line-height: 1.5; text-align: center; }
+  .hero .kicker::before { display: none; }
   .k-city { display: block; }
   .k-sep { display: none; }
-  .hero-title { margin-top: 2.8rem; }
-  .hand { left: auto; right: 6px; top: -1.45em; }
+  .hero-title { margin: 0 0 1.6rem; }
+  .hero-logo { width: var(--logo-w); }
+  .hand { left: auto; right: -.3em; top: auto; bottom: -1.05em; font-size: 1.45rem; }
   .hand svg { display: none; }
+  .hero-lede { font-size: 1rem; line-height: 1.5; max-width: 22em; }
+  .hero-cta { justify-content: center; gap: .6rem; margin-top: 1.2rem; }
   .badge { width: 104px; bottom: auto; top: 98px; }
-  .hero-inner { padding-bottom: 150px; }
   .hero-cta .btn-ghost { display: none; }
 }
 
