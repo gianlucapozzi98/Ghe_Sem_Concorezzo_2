@@ -28,7 +28,7 @@
   /* Menu del giorno: link CSV del foglio Google "Ghe sem · Menu del giorno"
      (nel foglio: File → Condividi → Pubblica sul web → la scheda del menu → Valori separati da virgola (.csv)).
      Se è vuoto, o se il foglio non risponde, resta il menu scritto in index.html. */
-  const MENU_CSV = '';
+  const MENU_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVCKHGiXYxCPmEzn_GDNfcGrG1eu7JyLDDOGdyWqHAgaKUE5Htf9wN3_btcAip7BZasVOGswS7FUcb/pub?output=csv';
 
   const fmt = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
 
@@ -107,16 +107,12 @@
     flyEnd = Math.max(80, logoHome.y - t.top);
   }
 
-  const heroHand = $('.hand');
   function flyLogo(y) {
     if (!logoHome) return;
     const docked = y >= flyEnd;
     const p = Math.min(1, Math.max(0, y) / flyEnd);
     document.body.classList.toggle('logo-docked', docked);
     heroLogo.classList.toggle('is-docked', docked);
-    /* la nota "in dialetto: ci siamo!" indica il logo: sparisce appena il logo parte.
-       Si usa filter perché l'opacità è già occupata dall'animazione di entrata. */
-    if (heroHand) heroHand.style.filter = p > 0 ? `opacity(${Math.max(0, 1 - p * 3).toFixed(2)})` : '';
     if (docked || reduceMotion) { heroLogo.style.transform = ''; return; }
     const t = navLogo.getBoundingClientRect();
     const s = 1 + (t.height / logoHome.h - 1) * p;
