@@ -25,10 +25,10 @@
   const DAY_NAMES = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
   const PRICE = 13;
   const ADDRESS = 'Via Remo Brambilla 23, Concorezzo';
-  /* Menu del giorno: link CSV del foglio Google "Ghe sem · Menu del giorno"
-     (nel foglio: File → Condividi → Pubblica sul web → la scheda del menu → Valori separati da virgola (.csv)).
-     Se è vuoto, o se il foglio non risponde, resta il menu scritto in index.html. */
-  const MENU_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVCKHGiXYxCPmEzn_GDNfcGrG1eu7JyLDDOGdyWqHAgaKUE5Htf9wN3_btcAip7BZasVOGswS7FUcb/pub?output=csv';
+  /* Menu del giorno: il sito lo chiede a /api/menu (api/menu.js), che lo legge dal
+     foglio Google. Il link del foglio sta lì. Se /api/menu non risponde (per esempio
+     in locale con python), resta il menu scritto in index.html. */
+  const MENU_CSV = '/api/menu';
 
   const fmt = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
 

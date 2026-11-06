@@ -1,15 +1,23 @@
 # Ghe sem · Concorezzo
 
-Sito statico: HTML, CSS e JavaScript, senza build né dipendenze.
+Sito statico (HTML, CSS e JavaScript, senza build né dipendenze) più una piccola funzione su Vercel per il menu del giorno.
 
 ```
 index.html      contenuti e struttura
-css/style.css   stile (palette e font in cima al file)
+privacy.html    informativa privacy e cookie
+css/style.css   stile (font, palette in cima al file)
 js/main.js      comportamento (orari in cima al file)
-img/logo-ghe-sem.svg   logo (ricalcato dall'insegna), usato nel menu e nel footer
+api/menu.js     legge il menu dal foglio Google e lo passa al sito (risponde a /api/menu)
+fonts/          font ospitati sul sito (Fraunces, DM Sans, Caveat: SIL Open Font License)
+img/foto/       foto in WebP, in più larghezze
+img/logo-ghe-sem.svg   logo (ricalcato dall'insegna), usato nella barra, nell'hero e nel footer
 favicon.svg            icona della scheda (il calice del logo)
 favicon-32.png, apple-touch-icon.png   la stessa icona in PNG, per Safari e iPhone
 ```
+
+## Nessun dato a terzi
+
+Aprendo il sito il browser del visitatore parla solo con questo sito: font, foto e logo sono nel progetto e il menu passa da `/api/menu`. Gli unici servizi esterni partono su richiesta del visitatore (mappa di Google al clic su «Mostra la mappa», link a Google Maps e WhatsApp). Per questo non serve il banner dei cookie. Se si aggiungono statistiche, pixel o altri servizi esterni, va aggiornata `privacy.html` e quasi sempre serve un banner.
 
 ## Vederlo in locale
 
@@ -17,21 +25,15 @@ favicon-32.png, apple-touch-icon.png   la stessa icona in PNG, per Safari e iPho
 python3 -m http.server 5173
 ```
 
-Poi apri http://127.0.0.1:5173
+Poi apri http://127.0.0.1:5173. In locale `/api/menu` non esiste, quindi il sito mostra il menu scritto in `index.html`.
 
 ## Pubblicarlo su Vercel
 
-Non serve nessuna configurazione. Dalla cartella del progetto:
-
-```bash
-npx vercel
-```
-
-Oppure trascina la cartella su vercel.com/new.
+Il sito si pubblica da solo a ogni push su `main`. La cartella `api/` viene trasformata da Vercel in una funzione, senza configurazione.
 
 ## Cose da aggiornare
 
-**Menu del giorno**. Lo aggiorna il locale dal foglio Google "Ghe sem · Menu del giorno" (anche dall'app Fogli sul telefono): una riga "Data del menu" e poi una riga per piatto, con Categoria (Primi, Secondi, Contorni, Dolce), Piatto e Descrizione. Il sito legge il foglio a ogni visita tramite il link CSV in `MENU_CSV`, in cima a `js/main.js`; le modifiche si vedono entro qualche minuto. Se il link è vuoto o il foglio non risponde, il sito mostra il menu scritto in `index.html` (sezione `id="menu"`, con la data nei punti `data-menu-date`): conviene aggiornarlo ogni tanto, perché è quello che vede chi ha JavaScript spento.
+**Menu del giorno**. Lo aggiorna il locale dal foglio Google (anche dall'app Fogli sul telefono): una riga "Data del menu" e poi una riga per piatto, con Categoria (Primi, Secondi, Contorni, Dolce), Piatto e Descrizione. Il foglio deve restare pubblicato (File → Condividi → Pubblica sul web). Il link CSV del foglio è in `api/menu.js`; il sito rilegge il foglio al massimo una volta al minuto, più il ritardo di Google (circa 5 minuti). Se il foglio non risponde, il sito mostra il menu scritto in `index.html` (sezione `id="menu"`, con la data nei punti `data-menu-date`): conviene aggiornarlo ogni tanto, perché è quello che vede chi ha JavaScript spento.
 
 **Orari**. Vanno cambiati in quattro posti:
 1. la tabella in `id="dove"` (`index.html`)
@@ -39,10 +41,9 @@ Oppure trascina la cartella su vercel.com/new.
 3. i dati strutturati `openingHoursSpecification` nel `<head>` (per Google)
 4. il riepilogo nel footer
 
-**Foto**. Per ora sono segnaposto da Unsplash: in `index.html` cerca `images.unsplash.com` e sostituisci gli URL con le foto vere (meglio come file in una cartella `img/`, in formato WebP). Cambia anche l'immagine `og:image` nel `<head>`, che compare quando il link viene condiviso.
+**Foto**. Per ora sono segnaposto prese da Unsplash e salvate in `img/foto/` (nome che dice dove sono usate, poi la larghezza: `hero-banco-800.webp`). Per metterci le foto vere basta sostituire i file tenendo gli stessi nomi e larghezze, in WebP. L'immagine di anteprima per i link condivisi è `img/foto/hero-pranzo-1200x630.jpg` (`og:image` nel `<head>`).
 
 ## Prima di andare online
 
-- Aggiungere Privacy e Cookie policy, e i dati societari (P.IVA) nel footer.
+- Ragione sociale e P.IVA nel footer (obbligatoria per legge sul sito di un'attività) e in `privacy.html`, dove c'è il commento "DA COMPLETARE".
 - Sostituire le foto segnaposto e togliere la dicitura nel footer.
-- La mappa di Google si carica solo al click, quindi non servono banner cookie per la mappa. Se si aggiungono analytics o altri servizi, serve un banner.
